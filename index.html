@@ -1,421 +1,545 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>2D Transformations Playground</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- p5.js for canvas drawing and math -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
-        /* Custom range slider styling for a cleaner look */
-        input[type=range] {
-            accent-color: #4f46e5; /* Indigo 600 */
-        }
-        canvas {
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        }
+      /* Custom range slider styling for a cleaner look */
+      input[type="range"] {
+        accent-color: #4f46e5; /* Indigo 600 */
+      }
+      canvas {
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      }
     </style>
-</head>
-<body class="bg-gray-50 min-h-screen p-4 md:p-8 font-sans text-gray-800">
-
+  </head>
+  <body class="bg-gray-50 min-h-screen p-4 md:p-8 font-sans text-gray-800">
     <div class="max-w-6xl mx-auto">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">2D Geometric Transformations</h1>
-            <p class="text-gray-600">Drag the red points on the Identity shape (top-left) to see how transformations affect the geometry in real-time.</p>
-        </header>
+      <header class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">
+          2D Geometric Transformations
+        </h1>
+        <p class="text-gray-600">
+          Drag the red points on the Identity shape (top-left) to see how
+          transformations affect the geometry in real-time.
+        </p>
+      </header>
 
-        <!-- Main Grid Container -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            <!-- (a) Identity / Base Shape -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center">
-                <h2 class="text-lg font-bold mb-1 w-full text-center">Identity </h2>
-                <p class="text-xs text-gray-500 mb-3 text-center">Base geometric shape.</p>
-                <div id="canvas-identity" class="mb-4"></div>
-                <div class="w-full text-center text-sm p-2 rounded">
-                    <span class="font-bold">Draggable:</span> Drag the vertices to change the shape.
-                </div>
-            </div>
-
-            <!-- (b) Translation -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center">
-                <h2 class="text-lg font-bold mb-1 w-full text-center">Translation</h2>
-                <p class="text-xs text-gray-500 mb-3 text-center">Shifts the object along X and Y axes.</p>
-                <div id="canvas-translation" class="mb-4"></div>
-                <div class="w-full flex flex-col gap-3">
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-semibold w-16">Tx: <span id="tx-val" class="font-normal">50</span></label>
-                        <input type="range" id="tx-slider" min="-150" max="150" value="50" step="1" class="flex-1">
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-semibold w-16">Ty: <span id="ty-val" class="font-normal">30</span></label>
-                        <input type="range" id="ty-slider" min="-150" max="150" value="30" step="1" class="flex-1">
-                    </div>
-                </div>
-            </div>
-
-            <!-- (c) Rotation -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center">
-                <h2 class="text-lg font-bold mb-1 w-full text-center">Rotation</h2>
-                <p class="text-xs text-gray-500 mb-3 text-center">Rotates the object about the origin (0,0).</p>
-                <div id="canvas-rotation" class="mb-4"></div>
-                <div class="w-full flex flex-col gap-3">
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-semibold w-24">&theta; (deg): <span id="th-val" class="font-normal">45</span></label>
-                        <input type="range" id="th-slider" min="-180" max="180" value="45" step="1" class="flex-1">
-                    </div>
-                </div>
-            </div>
-
-            <!-- (d) Scaling -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center">
-                <h2 class="text-lg font-bold mb-1 w-full text-center">Scaling</h2>
-                <p class="text-xs text-gray-500 mb-3 text-center">Resizes the object. Negative flips it.</p>
-                <div id="canvas-scale" class="mb-4"></div>
-                <div class="w-full flex flex-col gap-3">
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-semibold w-16">Sx: <span id="sx-val" class="font-normal">1.5</span></label>
-                        <input type="range" id="sx-slider" min="-3" max="3" value="1.5" step="0.1" class="flex-1">
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-semibold w-16">Sy: <span id="sy-val" class="font-normal">1.5</span></label>
-                        <input type="range" id="sy-slider" min="-3" max="3" value="1.5" step="0.1" class="flex-1">
-                    </div>
-                </div>
-            </div>
-
-            <!-- (e) Shearing -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center">
-                <h2 class="text-lg font-bold mb-1 w-full text-center">Shearing (Skew)</h2>
-                <p class="text-xs text-gray-500 mb-3 text-center">Slants the object along the axes.</p>
-                <div id="canvas-shear" class="mb-4"></div>
-                <div class="w-full flex flex-col gap-3">
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-semibold w-20">Skew X: <span id="shx-val" class="font-normal">0.5</span></label>
-                        <input type="range" id="shx-slider" min="-2" max="2" value="0.5" step="0.1" class="flex-1">
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <label class="text-sm font-semibold w-20">Skew Y: <span id="shy-val" class="font-normal">0</span></label>
-                        <input type="range" id="shy-slider" min="-2" max="2" value="0" step="0.1" class="flex-1">
-                    </div>
-                </div>
-            </div>
-
-            <!-- (f) Reflection -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center">
-                <h2 class="text-lg font-bold mb-1 w-full text-center">Reflection</h2>
-                <p class="text-xs text-gray-500 mb-3 text-center">Flips the object across the chosen axis.</p>
-                <div id="canvas-reflection" class="mb-4"></div>
-                <div class="w-full flex justify-center gap-8 mt-2">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="refx-check" class="w-4 h-4 text-indigo-600 rounded border-gray-300">
-                        <span class="text-sm font-semibold">Reflect X-Axis</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="refy-check" checked class="w-4 h-4 text-indigo-600 rounded border-gray-300">
-                        <span class="text-sm font-semibold">Reflect Y-Axis</span>
-                    </label>
-                </div>
-            </div>
-
+      <!-- Main Grid Container -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- (a) Identity / Base Shape -->
+        <div
+          class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center"
+        >
+          <h2 class="text-lg font-bold mb-1 w-full text-center">Identity</h2>
+          <p class="text-xs text-gray-500 mb-3 text-center">
+            Base geometric shape.
+          </p>
+          <div id="canvas-identity" class="mb-4"></div>
+          <div class="w-full text-center text-sm p-2 rounded">
+            <span class="font-bold">Draggable:</span> Drag the vertices to
+            change the shape.
+          </div>
         </div>
+
+        <!-- (b) Translation -->
+        <div
+          class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center"
+        >
+          <h2 class="text-lg font-bold mb-1 w-full text-center">Translation</h2>
+          <p class="text-xs text-gray-500 mb-3 text-center">
+            Shifts the object along X and Y axes.
+          </p>
+          <div id="canvas-translation" class="mb-4"></div>
+          <div class="w-full flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold w-16"
+                >Tx: <span id="tx-val" class="font-normal">50</span></label
+              >
+              <input
+                type="range"
+                id="tx-slider"
+                min="-150"
+                max="150"
+                value="50"
+                step="1"
+                class="flex-1"
+              />
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold w-16"
+                >Ty: <span id="ty-val" class="font-normal">30</span></label
+              >
+              <input
+                type="range"
+                id="ty-slider"
+                min="-150"
+                max="150"
+                value="30"
+                step="1"
+                class="flex-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- (c) Rotation -->
+        <div
+          class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center"
+        >
+          <h2 class="text-lg font-bold mb-1 w-full text-center">Rotation</h2>
+          <p class="text-xs text-gray-500 mb-3 text-center">
+            Rotates the object about the origin (0,0).
+          </p>
+          <div id="canvas-rotation" class="mb-4"></div>
+          <div class="w-full flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold w-24"
+                >&theta; (deg):
+                <span id="th-val" class="font-normal">45</span></label
+              >
+              <input
+                type="range"
+                id="th-slider"
+                min="-180"
+                max="180"
+                value="45"
+                step="1"
+                class="flex-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- (d) Scaling -->
+        <div
+          class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center"
+        >
+          <h2 class="text-lg font-bold mb-1 w-full text-center">Scaling</h2>
+          <p class="text-xs text-gray-500 mb-3 text-center">
+            Resizes the object. Negative flips it.
+          </p>
+          <div id="canvas-scale" class="mb-4"></div>
+          <div class="w-full flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold w-16"
+                >Sx: <span id="sx-val" class="font-normal">1.5</span></label
+              >
+              <input
+                type="range"
+                id="sx-slider"
+                min="-3"
+                max="3"
+                value="1.5"
+                step="0.1"
+                class="flex-1"
+              />
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold w-16"
+                >Sy: <span id="sy-val" class="font-normal">1.5</span></label
+              >
+              <input
+                type="range"
+                id="sy-slider"
+                min="-3"
+                max="3"
+                value="1.5"
+                step="0.1"
+                class="flex-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- (e) Shearing -->
+        <div
+          class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center"
+        >
+          <h2 class="text-lg font-bold mb-1 w-full text-center">
+            Shearing (Skew)
+          </h2>
+          <p class="text-xs text-gray-500 mb-3 text-center">
+            Slants the object along the axes.
+          </p>
+          <div id="canvas-shear" class="mb-4"></div>
+          <div class="w-full flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold w-20"
+                >Skew X:
+                <span id="shx-val" class="font-normal">0.5</span></label
+              >
+              <input
+                type="range"
+                id="shx-slider"
+                min="-2"
+                max="2"
+                value="0.5"
+                step="0.1"
+                class="flex-1"
+              />
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold w-20"
+                >Skew Y: <span id="shy-val" class="font-normal">0</span></label
+              >
+              <input
+                type="range"
+                id="shy-slider"
+                min="-2"
+                max="2"
+                value="0"
+                step="0.1"
+                class="flex-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- (f) Reflection -->
+        <div
+          class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center"
+        >
+          <h2 class="text-lg font-bold mb-1 w-full text-center">Reflection</h2>
+          <p class="text-xs text-gray-500 mb-3 text-center">
+            Flips the object across the chosen axis.
+          </p>
+          <div id="canvas-reflection" class="mb-4"></div>
+          <div class="w-full flex justify-center gap-8 mt-2">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                id="refx-check"
+                class="w-4 h-4 text-indigo-600 rounded border-gray-300"
+              />
+              <span class="text-sm font-semibold">Reflect X-Axis</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                id="refy-check"
+                checked
+                class="w-4 h-4 text-indigo-600 rounded border-gray-300"
+              />
+              <span class="text-sm font-semibold">Reflect Y-Axis</span>
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        // Global state: The base geometric points for an 'F' shape
-        // Shared across all sketch instances
-        const baseShape = [
-            {x: -20, y: -40}, // Bottom left of stem
-            {x: -20, y: 40},  // Top left of stem
-            {x: 30, y: 40},   // Top right of top bar
-            {x: 30, y: 20},   // Bottom right of top bar
-            {x: 0, y: 20},    // Inner corner top
-            {x: 0, y: 0},     // Inner corner middle-top
-            {x: 20, y: 0},    // Right of middle bar
-            {x: 20, y: -20},  // Bottom of middle bar
-            {x: 0, y: -20},   // Inner corner middle-bottom
-            {x: 0, y: -40}    // Bottom right of stem
-        ];
+      // Global state: The base geometric points for an 'F' shape
+      // Shared across all sketch instances
+      const baseShape = [
+        { x: -20, y: -40 }, // Bottom left of stem
+        { x: -20, y: 40 }, // Top left of stem
+        { x: 30, y: 40 }, // Top right of top bar
+        { x: 30, y: 20 }, // Bottom right of top bar
+        { x: 0, y: 20 }, // Inner corner top
+        { x: 0, y: 0 }, // Inner corner middle-top
+        { x: 20, y: 0 }, // Right of middle bar
+        { x: 20, y: -20 }, // Bottom of middle bar
+        { x: 0, y: -20 }, // Inner corner middle-bottom
+        { x: 0, y: -40 }, // Bottom right of stem
+      ];
 
-        const CANVAS_SIZE = 280;
+      const CANVAS_SIZE = 280;
 
-        // Utility function used by all sketches to draw the Cartesian coordinate system
-        function drawGridAndAxes(p) {
-            p.push();
-            // Grid lines
-            p.stroke(235);
-            p.strokeWeight(1);
-            for (let i = -p.width / 2; i < p.width / 2; i += 20) {
-                p.line(i, -p.height / 2, i, p.height / 2);
-                p.line(-p.width / 2, i, p.width / 2, i);
+      // Utility function used by all sketches to draw the Cartesian coordinate system
+      function drawGridAndAxes(p) {
+        p.push();
+        // Grid lines
+        p.stroke(235);
+        p.strokeWeight(1);
+        for (let i = -p.width / 2; i < p.width / 2; i += 20) {
+          p.line(i, -p.height / 2, i, p.height / 2);
+          p.line(-p.width / 2, i, p.width / 2, i);
+        }
+        // Major Axes
+        p.stroke(150);
+        p.strokeWeight(2);
+        p.line(0, -p.height / 2, 0, p.height / 2); // Y-axis
+        p.line(-p.width / 2, 0, p.width / 2, 0); // X-axis
+        p.pop();
+      }
+
+      // Utility to draw the ghost (original un-transformed shape)
+      function drawGhostShape(p) {
+        p.push();
+        p.fill(200, 200, 200, 100);
+        p.stroke(150, 150, 150, 150);
+        p.strokeWeight(1);
+        p.beginShape();
+        baseShape.forEach((pt) => p.vertex(pt.x, pt.y));
+        p.endShape(p.CLOSE);
+        p.pop();
+      }
+
+      // --- (a) Identity Sketch ---
+      new p5((p) => {
+        let draggedPoint = null;
+
+        p.setup = () => {
+          let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
+          canvas.parent("canvas-identity");
+        };
+
+        p.draw = () => {
+          p.background(255);
+
+          // Set origin to center, and Y-axis pointing UP (standard Cartesian)
+          p.translate(p.width / 2, p.height / 2);
+          p.scale(1, -1);
+
+          drawGridAndAxes(p);
+
+          // Draw Base Shape
+          p.fill(100, 150, 255, 150);
+          p.stroke(50, 100, 255);
+          p.strokeWeight(2);
+          p.beginShape();
+          baseShape.forEach((pt) => p.vertex(pt.x, pt.y));
+          p.endShape(p.CLOSE);
+
+          // Draw Interactive Handles
+          p.fill(239, 68, 68); // Red handles
+          p.stroke(255);
+          p.strokeWeight(1);
+          baseShape.forEach((pt) => {
+            p.circle(pt.x, pt.y, 10);
+          });
+        };
+
+        p.mousePressed = () => {
+          // Ensure click is inside this specific canvas
+          if (
+            p.mouseX >= 0 &&
+            p.mouseX <= p.width &&
+            p.mouseY >= 0 &&
+            p.mouseY <= p.height
+          ) {
+            // Convert mouse coordinates to world coordinates (centered, Y-up)
+            let mx = p.mouseX - p.width / 2;
+            let my = -(p.mouseY - p.height / 2);
+
+            // Find if a point is clicked
+            for (let pt of baseShape) {
+              if (p.dist(mx, my, pt.x, pt.y) < 12) {
+                draggedPoint = pt;
+                break;
+              }
             }
-            // Major Axes
-            p.stroke(150);
-            p.strokeWeight(2);
-            p.line(0, -p.height / 2, 0, p.height / 2); // Y-axis
-            p.line(-p.width / 2, 0, p.width / 2, 0); // X-axis
-            p.pop();
-        }
+          }
+        };
 
-        // Utility to draw the ghost (original un-transformed shape)
-        function drawGhostShape(p) {
-            p.push();
-            p.fill(200, 200, 200, 100);
-            p.stroke(150, 150, 150, 150);
-            p.strokeWeight(1);
-            p.beginShape();
-            baseShape.forEach(pt => p.vertex(pt.x, pt.y));
-            p.endShape(p.CLOSE);
-            p.pop();
-        }
+        p.mouseDragged = () => {
+          if (draggedPoint) {
+            draggedPoint.x = p.mouseX - p.width / 2;
+            draggedPoint.y = -(p.mouseY - p.height / 2);
+          }
+        };
 
-        // --- (a) Identity Sketch ---
-        new p5((p) => {
-            let draggedPoint = null;
+        p.mouseReleased = () => {
+          draggedPoint = null;
+        };
+      });
 
-            p.setup = () => {
-                let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
-                canvas.parent('canvas-identity');
-            };
+      // --- (b) Translation Sketch ---
+      new p5((p) => {
+        let txSlider = document.getElementById("tx-slider");
+        let tySlider = document.getElementById("ty-slider");
+        let txVal = document.getElementById("tx-val");
+        let tyVal = document.getElementById("ty-val");
 
-            p.draw = () => {
-                p.background(255);
-                
-                // Set origin to center, and Y-axis pointing UP (standard Cartesian)
-                p.translate(p.width / 2, p.height / 2);
-                p.scale(1, -1); 
+        p.setup = () => {
+          let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
+          canvas.parent("canvas-translation");
+        };
 
-                drawGridAndAxes(p);
+        p.draw = () => {
+          p.background(255);
+          p.translate(p.width / 2, p.height / 2);
+          p.scale(1, -1);
 
-                // Draw Base Shape
-                p.fill(100, 150, 255, 150);
-                p.stroke(50, 100, 255);
-                p.strokeWeight(2);
-                p.beginShape();
-                baseShape.forEach(pt => p.vertex(pt.x, pt.y));
-                p.endShape(p.CLOSE);
+          drawGridAndAxes(p);
+          drawGhostShape(p);
 
-                // Draw Interactive Handles
-                p.fill(239, 68, 68); // Red handles
-                p.stroke(255);
-                p.strokeWeight(1);
-                baseShape.forEach(pt => {
-                    p.circle(pt.x, pt.y, 10);
-                });
-            };
+          let tx = parseFloat(txSlider.value);
+          let ty = parseFloat(tySlider.value);
+          txVal.innerText = tx;
+          tyVal.innerText = ty;
 
-            p.mousePressed = () => {
-                // Ensure click is inside this specific canvas
-                if (p.mouseX >= 0 && p.mouseX <= p.width && p.mouseY >= 0 && p.mouseY <= p.height) {
-                    // Convert mouse coordinates to world coordinates (centered, Y-up)
-                    let mx = p.mouseX - p.width / 2;
-                    let my = -(p.mouseY - p.height / 2);
+          // Draw Transformed Shape
+          p.fill(34, 197, 94, 150); // Green
+          p.stroke(21, 128, 61);
+          p.strokeWeight(2);
+          p.beginShape();
+          baseShape.forEach((pt) => {
+            let x = pt.x + tx;
+            let y = pt.y + ty;
+            p.vertex(x, y);
+          });
+          p.endShape(p.CLOSE);
+        };
+      });
 
-                    // Find if a point is clicked
-                    for (let pt of baseShape) {
-                        if (p.dist(mx, my, pt.x, pt.y) < 12) {
-                            draggedPoint = pt;
-                            break;
-                        }
-                    }
-                }
-            };
+      // --- (c) Rotation Sketch ---
+      new p5((p) => {
+        let thSlider = document.getElementById("th-slider");
+        let thVal = document.getElementById("th-val");
 
-            p.mouseDragged = () => {
-                if (draggedPoint) {
-                    draggedPoint.x = p.mouseX - p.width / 2;
-                    draggedPoint.y = -(p.mouseY - p.height / 2);
-                }
-            };
+        p.setup = () => {
+          let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
+          canvas.parent("canvas-rotation");
+        };
 
-            p.mouseReleased = () => {
-                draggedPoint = null;
-            };
-        });
+        p.draw = () => {
+          p.background(255);
+          p.translate(p.width / 2, p.height / 2);
+          p.scale(1, -1);
 
-        // --- (b) Translation Sketch ---
-        new p5((p) => {
-            let txSlider = document.getElementById('tx-slider');
-            let tySlider = document.getElementById('ty-slider');
-            let txVal = document.getElementById('tx-val');
-            let tyVal = document.getElementById('ty-val');
+          drawGridAndAxes(p);
+          drawGhostShape(p);
 
-            p.setup = () => {
-                let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
-                canvas.parent('canvas-translation');
-            };
+          let theta = parseFloat(thSlider.value);
+          thVal.innerText = theta;
+          let rad = (theta * Math.PI) / 180;
+          let cosT = Math.cos(rad);
+          let sinT = Math.sin(rad);
 
-            p.draw = () => {
-                p.background(255);
-                p.translate(p.width / 2, p.height / 2);
-                p.scale(1, -1);
+          // Draw Transformed Shape
+          p.fill(168, 85, 247, 150); // Purple
+          p.stroke(126, 34, 206);
+          p.strokeWeight(2);
+          p.beginShape();
+          baseShape.forEach((pt) => {
+            let x = pt.x * cosT - pt.y * sinT;
+            let y = pt.x * sinT + pt.y * cosT;
+            p.vertex(x, y);
+          });
+          p.endShape(p.CLOSE);
+        };
+      });
 
-                drawGridAndAxes(p);
-                drawGhostShape(p);
+      // --- (d) Scaling Sketch ---
+      new p5((p) => {
+        let sxSlider = document.getElementById("sx-slider");
+        let sySlider = document.getElementById("sy-slider");
+        let sxVal = document.getElementById("sx-val");
+        let syVal = document.getElementById("sy-val");
 
-                let tx = parseFloat(txSlider.value);
-                let ty = parseFloat(tySlider.value);
-                txVal.innerText = tx;
-                tyVal.innerText = ty;
+        p.setup = () => {
+          let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
+          canvas.parent("canvas-scale");
+        };
 
-                // Draw Transformed Shape
-                p.fill(34, 197, 94, 150); // Green
-                p.stroke(21, 128, 61);
-                p.strokeWeight(2);
-                p.beginShape();
-                baseShape.forEach(pt => {
-                    p.vertex(pt.x, pt.y);
-                });
-                p.endShape(p.CLOSE);
-            };
-        });
+        p.draw = () => {
+          p.background(255);
+          p.translate(p.width / 2, p.height / 2);
+          p.scale(1, -1);
 
-        // --- (c) Rotation Sketch ---
-        new p5((p) => {
-            let thSlider = document.getElementById('th-slider');
-            let thVal = document.getElementById('th-val');
+          drawGridAndAxes(p);
+          drawGhostShape(p);
 
-            p.setup = () => {
-                let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
-                canvas.parent('canvas-rotation');
-            };
+          let sx = parseFloat(sxSlider.value);
+          let sy = parseFloat(sySlider.value);
+          sxVal.innerText = sx;
+          syVal.innerText = sy;
 
-            p.draw = () => {
-                p.background(255);
-                p.translate(p.width / 2, p.height / 2);
-                p.scale(1, -1);
+          // Draw Transformed Shape
+          p.fill(234, 179, 8, 150); // Yellow
+          p.stroke(161, 98, 7);
+          p.strokeWeight(2);
+          p.beginShape();
+          baseShape.forEach((pt) => {
+            let x = pt.x * sx;
+            let y = pt.y * sy;
+            p.vertex(x, y);
+          });
+          p.endShape(p.CLOSE);
+        };
+      });
 
-                drawGridAndAxes(p);
-                drawGhostShape(p);
+      // --- (e) Shearing Sketch ---
+      new p5((p) => {
+        let shxSlider = document.getElementById("shx-slider");
+        let shySlider = document.getElementById("shy-slider");
+        let shxVal = document.getElementById("shx-val");
+        let shyVal = document.getElementById("shy-val");
 
-                let theta = parseFloat(thSlider.value);
-                thVal.innerText = theta;
-                let rad = theta * Math.PI / 180;
-                let cosT = Math.cos(rad);
-                let sinT = Math.sin(rad);
+        p.setup = () => {
+          let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
+          canvas.parent("canvas-shear");
+        };
 
-                // Draw Transformed Shape
-                p.fill(168, 85, 247, 150); // Purple
-                p.stroke(126, 34, 206);
-                p.strokeWeight(2);
-                p.beginShape();
-                baseShape.forEach(pt => {
-                    p.vertex(pt.x, pt.y);
-                });
-                p.endShape(p.CLOSE);
-            };
-        });
+        p.draw = () => {
+          p.background(255);
+          p.translate(p.width / 2, p.height / 2);
+          p.scale(1, -1);
 
-        // --- (d) Scaling Sketch ---
-        new p5((p) => {
-            let sxSlider = document.getElementById('sx-slider');
-            let sySlider = document.getElementById('sy-slider');
-            let sxVal = document.getElementById('sx-val');
-            let syVal = document.getElementById('sy-val');
+          drawGridAndAxes(p);
+          drawGhostShape(p);
 
-            p.setup = () => {
-                let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
-                canvas.parent('canvas-scale');
-            };
+          let shx = parseFloat(shxSlider.value);
+          let shy = parseFloat(shySlider.value);
+          shxVal.innerText = shx;
+          shyVal.innerText = shy;
 
-            p.draw = () => {
-                p.background(255);
-                p.translate(p.width / 2, p.height / 2);
-                p.scale(1, -1);
+          // Draw Transformed Shape
+          p.fill(236, 72, 153, 150); // Pink
+          p.stroke(190, 24, 93);
+          p.strokeWeight(2);
+          p.beginShape();
+          baseShape.forEach((pt) => {
+            let x = pt.x + pt.y * shx;
+            let y = pt.y + pt.x * shy;
+            p.vertex(x, y);
+          });
+          p.endShape(p.CLOSE);
+        };
+      });
 
-                drawGridAndAxes(p);
-                drawGhostShape(p);
+      // --- (f) Reflection Sketch ---
+      new p5((p) => {
+        let refxCheck = document.getElementById("refx-check");
+        let refyCheck = document.getElementById("refy-check");
 
-                let sx = parseFloat(sxSlider.value);
-                let sy = parseFloat(sySlider.value);
-                sxVal.innerText = sx;
-                syVal.innerText = sy;
+        p.setup = () => {
+          let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
+          canvas.parent("canvas-reflection");
+        };
 
-                // Draw Transformed Shape
-                p.fill(234, 179, 8, 150); // Yellow
-                p.stroke(161, 98, 7);
-                p.strokeWeight(2);
-                p.beginShape();
-                baseShape.forEach(pt => {
-                    p.vertex(pt.x, pt.y);
-                });
-                p.endShape(p.CLOSE);
-            };
-        });
+        p.draw = () => {
+          p.background(255);
+          p.translate(p.width / 2, p.height / 2);
+          p.scale(1, -1);
 
-        // --- (e) Shearing Sketch ---
-        new p5((p) => {
-            let shxSlider = document.getElementById('shx-slider');
-            let shySlider = document.getElementById('shy-slider');
-            let shxVal = document.getElementById('shx-val');
-            let shyVal = document.getElementById('shy-val');
+          drawGridAndAxes(p);
+          drawGhostShape(p);
 
-            p.setup = () => {
-                let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
-                canvas.parent('canvas-shear');
-            };
+          let refX = refxCheck.checked;
+          let refY = refyCheck.checked;
 
-            p.draw = () => {
-                p.background(255);
-                p.translate(p.width / 2, p.height / 2);
-                p.scale(1, -1);
-
-                drawGridAndAxes(p);
-                drawGhostShape(p);
-
-                let shx = parseFloat(shxSlider.value);
-                let shy = parseFloat(shySlider.value);
-                shxVal.innerText = shx;
-                shyVal.innerText = shy;
-
-                // Draw Transformed Shape
-                p.fill(236, 72, 153, 150); // Pink
-                p.stroke(190, 24, 93);
-                p.strokeWeight(2);
-                p.beginShape();
-                baseShape.forEach(pt => {
-                    // Math: x' = x + y*shx, y' = y + x*shy
-                    p.vertex(pt.x, pt.y);
-                });
-                p.endShape(p.CLOSE);
-            };
-        });
-
-        // --- (f) Reflection Sketch ---
-        new p5((p) => {
-            let refxCheck = document.getElementById('refx-check');
-            let refyCheck = document.getElementById('refy-check');
-
-            p.setup = () => {
-                let canvas = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
-                canvas.parent('canvas-reflection');
-            };
-
-            p.draw = () => {
-                p.background(255);
-                p.translate(p.width / 2, p.height / 2);
-                p.scale(1, -1);
-
-                drawGridAndAxes(p);
-                drawGhostShape(p);
-
-                let refX = refxCheck.checked;
-                let refY = refyCheck.checked;
-
-                // Draw Transformed Shape
-                p.fill(14, 165, 233, 150); // Cyan
-                p.stroke(3, 105, 161);
-                p.strokeWeight(2);
-                p.beginShape();
-                baseShape.forEach(pt => {
-                    p.vertex(pt.x, pt.y);
-                });
-                p.endShape(p.CLOSE);
-            };
-        });
+          // Draw Transformed Shape
+          p.fill(14, 165, 233, 150); // Cyan
+          p.stroke(3, 105, 161);
+          p.strokeWeight(2);
+          p.beginShape();
+          baseShape.forEach((pt) => {
+            let x = refY ? -pt.x : pt.x;
+            let y = refX ? -pt.y : pt.y;
+            p.vertex(x, y);
+          });
+          p.endShape(p.CLOSE);
+        };
+      });
     </script>
-</body>
+  </body>
 </html>
